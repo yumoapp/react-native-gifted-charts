@@ -1273,7 +1273,7 @@ export const LineChart = (props: LineChartPropsType & { noData: boolean }) => {
             return <Path key={index} {...lineSvgProps} />;
           })
         ) : animateOnDataChange && animatedPath ? (
-          <AnimatedPath {...lineSvgPropsOuter} />
+          props.noData ? null : <AnimatedPath {...lineSvgPropsOuter} />
         ) : (
           props.noData ? null : <Path {...lineSvgPropsOuter} />
         )}
