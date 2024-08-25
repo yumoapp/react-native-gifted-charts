@@ -45,7 +45,7 @@ import {Pointer} from '../Components/common/Pointer';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-export const LineChart = (props: LineChartPropsType) => {
+export const LineChart = (props: LineChartPropsType & { noData: boolean }) => {
   const scrollRef = props.scrollRef ?? useRef(null);
   const opacityValue = useMemo(() => new Animated.Value(0), []);
   const heightValue = useMemo(() => new Animated.Value(0), []);
@@ -1213,45 +1213,17 @@ export const LineChart = (props: LineChartPropsType) => {
     }
     return (
       <Svg onPress={props.onBackgroundPress}>
-        {lineGradient && getLineGradientComponent()}
-        {points.includes(SEGMENT_START) || points.includes(RANGE_ENTER) ? (
-          ar.map((item, index) => {
-            const lineSvgProps: LineSvgProps = {
-              d: item.d,
-              fill: 'none',
-              stroke: lineGradient
-                ? props.lineGradientId
-                  ? `url(#${props.lineGradientId})`
-                  : `url(#lineGradient)`
-                : item.color,
-              strokeWidth: item.strokeWidth,
-            };
-            if (
-              item.strokeDashArray &&
-              item.strokeDashArray.length === 2 &&
-              typeof item.strokeDashArray[0] === 'number' &&
-              typeof item.strokeDashArray[1] === 'number'
-            ) {
-              lineSvgProps.strokeDasharray = item.strokeDashArray;
-            }
-            return <Path key={index} {...lineSvgProps} />;
-          })
-        ) : animateOnDataChange && animatedPath ? (
-          <AnimatedPath {...lineSvgPropsOuter} />
-        ) : (
-          <Path {...lineSvgPropsOuter} />
-        )}
-
+        {lineGradient && !props.noData && getLineGradientComponent()}
         {/***********************      For Area Chart        ************/}
 
-        {isNthAreaChart &&
+        {isNthAreaChart && !props.noData &&
           getAreaGradientComponent(
             startFillColor,
             endFillColor,
             startOpacity,
             endOpacity,
           )}
-        {isNthAreaChart ? (
+        {isNthAreaChart && !props.noData ? (
           animateOnDataChange && animatedFillPath ? (
             <AnimatedPath
               onPress={props.onChartAreaPress}
@@ -1278,6 +1250,33 @@ export const LineChart = (props: LineChartPropsType) => {
             />
           )
         ) : null}
+        {points.includes(SEGMENT_START) || points.includes(RANGE_ENTER) ? (
+          ar.map((item, index) => {
+            const lineSvgProps: LineSvgProps = {
+              d: item.d,
+              fill: 'none',
+              stroke: lineGradient
+                ? props.lineGradientId
+                  ? `url(#${props.lineGradientId})`
+                  : `url(#lineGradient)`
+                : item.color,
+              strokeWidth: item.strokeWidth,
+            };
+            if (
+              item.strokeDashArray &&
+              item.strokeDashArray.length === 2 &&
+              typeof item.strokeDashArray[0] === 'number' &&
+              typeof item.strokeDashArray[1] === 'number'
+            ) {
+              lineSvgProps.strokeDasharray = item.strokeDashArray;
+            }
+            return <Path key={index} {...lineSvgProps} />;
+          })
+        ) : animateOnDataChange && animatedPath ? (
+          <AnimatedPath {...lineSvgPropsOuter} />
+        ) : (
+          props.noData ? null : <Path {...lineSvgPropsOuter} />
+        )}
 
         {/******************************************************************/}
 
